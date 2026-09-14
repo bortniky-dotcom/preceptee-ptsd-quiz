@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PTSD preceptorship exam</title>
+<style>
+:root {
+  --navy: #0b1c2c;
+  --navy-2: #12263a;
+  --ink: #0a0a0a;
+  --paper: #f4f1ea;
+  --paper-2: #e8e2d6;
+  --line: #c9c1b2;
+  --ok: #1f4d3a;
+  --bad: #6b2a2a;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink); font-family: Georgia, "Times New Roman", serif; }
+body { min-height: 100vh; }
+header {
+  background: var(--navy);
+  color: var(--paper);
+  padding: 1rem 1.2rem 1.05rem;
+}
+header .brand { display: flex; align-items: center; gap: .75rem; }
+header img { width: 44px; height: 50px; object-fit: contain; }
+header p { margin: 0; font-size: .88rem; opacity: .85; font-family: system-ui, sans-serif; }
+main { max-width: 42rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.card { background: #fff; border: 1px solid var(--line); padding: 1.15rem 1.1rem 1.25rem; }
+.kicker { font-family: system-ui, sans-serif; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: #5b5348; margin: 0 0 .55rem; }
+h2 { margin: 0 0 .75rem; font-size: 1.2rem; }
+p, li { line-height: 1.45; }
+.stem { font-size: 1.05rem; margin: 0 0 1rem; }
+label.choice {
+  display: block;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  padding: .7rem .8rem;
+  margin: 0 0 .45rem;
+  cursor: pointer;
+  font-family: system-ui, sans-serif;
+  font-size: .95rem;
+}
+label.choice:has(input:checked) { outline: 2px solid var(--navy); background: #fff; }
+label.choice input { margin-right: .5rem; }
+.row { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+button, .btn {
+  appearance: none;
+  border: 0;
+  background: var(--navy);
+  color: var(--paper);
+  font-family: system-ui, sans-serif;
+  font-size: .95rem;
+  padding: .7rem 1rem;
+  cursor: pointer;
+}
+button.ghost { background: transparent; color: var(--navy); border: 1px solid var(--navy); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.progress { font-family: system-ui, sans-serif; font-size: .82rem; color: #5b5348; margin: 0 0 .8rem; }
+input[type=text] {
+  width: 100%;
+  font-size: 1rem;
+  padding: .6rem .65rem;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  font-family: system-ui, sans-serif;
+}
+.score { font-size: 1.6rem; margin: .2rem 0 .8rem; }
+.item { border-top: 1px solid var(--line); padding: 1rem 0; }
+.item .verdict { font-family: system-ui, sans-serif; font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; margin: 0 0 .35rem; }
+.ok { color: var(--ok); }
+.bad { color: var(--bad); }
+.note { font-family: system-ui, sans-serif; font-size: .86rem; color: #4a433a; }
+.hidden { display: none; }
+footer { max-width: 42rem; margin: 0 auto; padding: 0 1rem 2rem; font-family: system-ui, sans-serif; font-size: .78rem; color: #6a6258; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="" width="44" height="50" alt="YB crest">
+    <p>Preceptorship exam. 25 items. Answers after you submit.</p>
+  </div>
+</header>
+<main>
+  <section id="start" class="card">
+    <p class="kicker">Clinic exam</p>
+    <h2>PTSD clinic judgment</h2>
+    <p>Twenty-five items. One answer per item. A few items use a paired choice such as &ldquo;A and C.&rdquo;</p>
+    <p class="note">Work it like clinic. No looking ahead. Close the tab if you need to. This browser will keep your answers so you can continue. Use Reset exam if you want a clean start. After you submit you get a recap of what you missed.</p>
+    <label class="note" for="studentName">Your name</label>
+    <input id="studentName" type="text" autocomplete="name" placeholder="Name for the review copy">
+    <div class="row">
+      <button id="beginBtn" type="button">Start exam</button>
+      <button class="ghost" id="resetStartBtn" type="button">Reset exam</button>
+    </div>
+  </section>
+  <section id="quiz" class="card hidden">
+    <p class="progress" id="progress"></p>
+    <p class="kicker" id="meta"></p>
+    <p class="stem" id="stem"></p>
+    <div id="choices"></div>
+    <div class="row">
+      <button class="ghost" id="prevBtn" type="button">Back</button>
+      <button id="nextBtn" type="button">Next</button>
+      <button class="ghost" id="resetQuizBtn" type="button">Reset exam</button>
+    </div>
+  </section>
+  <section id="results" class="card hidden">
+    <p class="kicker">Submitted</p>
+    <p class="score" id="scoreLine"></p>
+    <p class="note" id="missedIntro"></p>
+    <div id="review"></div>
+    <div id="sendBox" style="margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--line)">
+      <p class="note">Send from this page. It stays in the browser. It does not open the phone mail app.</p>
+      <div class="row">
+        <button id="sendBtn" type="button">Send results from this page</button>
+        <button class="ghost" id="copyBtn" type="button">Copy summary</button>
+        <button class="ghost" id="resetDoneBtn" type="button">Reset exam</button>
+      </div>
+      <p class="note" id="sendStatus"></p>
+      <textarea id="summaryBox" readonly rows="8" style="width:100%;margin-top:.8rem;font-family:system-ui,sans-serif;font-size:.86rem;line-height:1.4;padding:.6rem .65rem;border:1px solid var(--line);background:var(--paper);color:var(--ink);"></textarea>
+    </div>
+  </section>
+</main>
+<footer>For Abigail and Polina only. Answer key available after.</footer>
+<script src="items.js"></script>
+<script>
+const EMAIL_HOST = ["moshe", "agentmail.to"].join("@");
+let idx = 0;
+const picks = Array(ITEMS.length).fill(null);
+const $ = (id) => document.getElementById(id);
+const STORE = "ptsdquiz.v2";
+function cookieGet(name) {
+  const hit = document.cookie.split("; ").find((p) => p.startsWith(name + "="));
+  return hit ? decodeURIComponent(hit.slice(name.length + 1)) : "";
+}
+function readStore() {
+  try {
+    const raw = localStorage.getItem(STORE) || cookieGet(STORE);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+function clearStore() {
+  try { localStorage.removeItem(STORE); } catch (e) {}
+  try { localStorage.removeItem("ptsdquiz.v1"); } catch (e) {}
+  document.cookie = STORE + "=;max-age=0;path=/;SameSite=Lax";
+  document.cookie = "ptsdquiz.v1=;max-age=0;path=/;SameSite=Lax";
+}
+function resetExam() {
+  if (!confirm("Erase this attempt and start from question 1?")) return;
+  for (let i = 0; i < picks.length; i++) picks[i] = null;
+  idx = 0;
+  lastGrade = null;
+  clearStore();
+  $("beginBtn").textContent = "Start exam";
+  $("quiz").classList.add("hidden");
+  $("results").classList.add("hidden");
+  $("start").classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+function writeStore(extra) {
+  const payload = JSON.stringify({
+    name: $("studentName").value.trim(),
+    idx: idx,
+    picks: picks,
+    submitted: !!(extra && extra.submitted)
+  });
+  try { localStorage.setItem(STORE, payload); } catch (e) {}
+  document.cookie = STORE + "=" + encodeURIComponent(payload) + ";max-age=" + (60*60*24*14) + ";path=/;SameSite=Lax";
+}
+function renderQuestion() {
+  const item = ITEMS[idx];
+  $("progress").textContent = "Question " + item.n + " of " + ITEMS.length;
+  $("meta").textContent = (item.type || item.topic) ? ("Type " + (item.type || "Q") + " \u00b7 " + (item.topic || "")) : ("Item " + item.n);
+  $("stem").textContent = item.stem;
+  const box = $("choices");
+  box.innerHTML = "";
+  Object.keys(item.choices).forEach((letter) => {
+    const lab = document.createElement("label");
+    lab.className = "choice";
+    const inp = document.createElement("input");
+    inp.type = "radio";
+    inp.name = "q";
+    inp.value = letter;
+    if (picks[idx] === letter) inp.checked = true;
+    inp.addEventListener("change", () => { picks[idx] = letter; writeStore(); });
+    lab.appendChild(inp);
+    lab.appendChild(document.createTextNode(letter + ". " + item.choices[letter]));
+    box.appendChild(lab);
+  });
+  $("prevBtn").disabled = idx === 0;
+  $("nextBtn").textContent = idx === ITEMS.length - 1 ? "Submit exam" : "Next";
+}
+function grade() {
+  let correct = 0;
+  const missed = [];
+  const review = $("review");
+  review.innerHTML = "";
+  ITEMS.forEach((item, i) => {
+    const chosen = picks[i] || "\u2014";
+    const ok = chosen === item.answer;
+    if (ok) correct += 1;
+    else missed.push({ item, chosen });
+    const div = document.createElement("div");
+    div.className = "item";
+    const choseTxt = item.choices[chosen] ? chosen + ". " + item.choices[chosen] : chosen;
+    const rightTxt = item.answer + ". " + item.choices[item.answer];
+    div.innerHTML =
+      "<p class=\"verdict " + (ok ? "ok" : "bad") + "\">" + (ok ? "Correct" : "Missed") + " \u00b7 Item " + item.n + "</p>" +
+      "<p><strong>" + item.stem + "</strong></p>" +
+      "<p>You chose " + choseTxt + "</p>" +
+      (ok ? "" : "<p>Correct answer " + rightTxt + "</p>");
+    review.appendChild(div);
+  });
+  $("scoreLine").textContent = correct + " / " + ITEMS.length;
+  $("missedIntro").textContent = missed.length ? missed.length + " missed. Recap below." : "Clean sheet.";
+  return { correct, missed };
+}
+let lastGrade = null;
+$("resetStartBtn").addEventListener("click", resetExam);
+$("resetQuizBtn").addEventListener("click", resetExam);
+$("resetDoneBtn").addEventListener("click", resetExam);
+$("beginBtn").addEventListener("click", () => {
+  $("start").classList.add("hidden");
+  $("quiz").classList.remove("hidden");
+  renderQuestion();
+  writeStore();
+  window.scrollTo(0, 0);
+});
+(function resume() {
+  const saved = readStore();
+  if (!saved) return;
+  if (saved.name) $("studentName").value = saved.name;
+  if (Array.isArray(saved.picks) && saved.picks.length === ITEMS.length) {
+    saved.picks.forEach((v, i) => { picks[i] = v; });
+  }
+  if (typeof saved.idx === "number") idx = saved.idx;
+  if (saved.submitted) {
+    lastGrade = grade();
+    fillSummaryBox();
+    $("start").classList.add("hidden");
+    $("quiz").classList.add("hidden");
+    $("results").classList.remove("hidden");
+    return;
+  }
+  if (picks.filter(Boolean).length || saved.idx) $("beginBtn").textContent = "Continue exam";
+})();
+$("prevBtn").addEventListener("click", () => {
+  if (idx > 0) { idx -= 1; renderQuestion(); writeStore(); window.scrollTo(0, 0); }
+});
+$("nextBtn").addEventListener("click", () => {
+  if (idx < ITEMS.length - 1) {
+    idx += 1;
+    renderQuestion();
+    writeStore();
+    window.scrollTo(0, 0);
+    return;
+  }
+  lastGrade = grade();
+  fillSummaryBox();
+  writeStore({ submitted: true });
+  $("quiz").classList.add("hidden");
+  $("results").classList.remove("hidden");
+  window.scrollTo(0, 0);
+});
+function buildSummary(includeRationale) {
+  if (!lastGrade) return "";
+  const name = $("studentName").value.trim() || "Unnamed student";
+  const missed = lastGrade.missed;
+  const lines = [
+    "Student: " + name,
+    "Exam: PTSD clinic judgment",
+    "Score: " + lastGrade.correct + " / " + ITEMS.length,
+    "",
+    missed.length ? "Missed items:" : "No items missed."
+  ];
+  missed.forEach(({ item, chosen }) => {
+    lines.push("");
+    lines.push("Item " + item.n + (item.topic ? (" [" + item.topic + "]") : ""));
+    lines.push(item.stem);
+    lines.push("Chose: " + chosen + " \u2014 " + (item.choices[chosen] || ""));
+    lines.push("Correct: " + item.answer + " \u2014 " + item.choices[item.answer]);
+    if (includeRationale) lines.push(item.rationale);
+  });
+  return lines.join("\n");
+}
+function fillSummaryBox() {
+  const text = buildSummary(false);
+  const box = $("summaryBox");
+  if (box) box.value = text;
+  return text;
+}
+async function copySummary() {
+  const text = fillSummaryBox();
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (e) {
+    try {
+      const box = $("summaryBox");
+      box.focus();
+      box.select();
+      document.execCommand("copy");
+      return true;
+    } catch (e2) {
+      return false;
+    }
+  }
+}
+$("copyBtn").addEventListener("click", async () => {
+  if (!lastGrade) return;
+  const ok = await copySummary();
+  $("sendStatus").textContent = ok
+    ? "Summary copied. Paste it wherever you send review notes."
+    : "Copy blocked. Select the text in the box and copy it.";
+});
+$("sendBtn").addEventListener("click", async () => {
+  if (!lastGrade) return;
+  const name = $("studentName").value.trim() || "Unnamed student";
+  const message = buildSummary(true);
+  fillSummaryBox();
+  $("sendStatus").textContent = "Sending from this page\u2026";
+  $("sendBtn").disabled = true;
+  try {
+    const body = new FormData();
+    body.append("_subject", "For Elisha to review and discuss with Yuriy");
+    body.append("_template", "box");
+    body.append("_captcha", "false");
+    body.append("_url", "https://ptsdquiz.yuriybortnik.com");
+    body.append("name", name);
+    body.append("score", lastGrade.correct + " / " + ITEMS.length);
+    body.append("message", message);
+    const res = await fetch("https://formsubmit.co/ajax/" + EMAIL_HOST, {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body
+    });
+    const data = await res.json().catch(() => ({}));
+    const okFlag = data && String(data.success) === "true";
+    const msg = (data && data.message) ? String(data.message) : "";
+    if (okFlag) {
+      $("sendStatus").textContent = "Sent from this page. Your preceptor will see the misses.";
+      return;
+    }
+    if (/activat/i.test(msg)) {
+      await copySummary();
+      $("sendStatus").textContent = "Queued from this page. Summary is also copied below.";
+      $("sendBtn").disabled = false;
+      return;
+    }
+    throw new Error(msg || "send failed");
+  } catch (err) {
+    await copySummary();
+    $("sendStatus").textContent = "Browser send did not go through. Summary is in the box. Copy it.";
+    $("sendBtn").disabled = false;
+  }
+});
+</script>
+<script src="yb-crest.js"></script>
+</body>
+</html>
